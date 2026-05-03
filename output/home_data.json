@@ -1,0 +1,195 @@
+{
+  "timestamp": "2026-05-03 15:32:30",
+  "devices": {
+    "Living Room": {
+      "light": {
+        "on": true,
+        "brightness": 80,
+        "color": "#FFD700"
+      },
+      "ac": {
+        "on": true,
+        "temp": 24,
+        "mode": "cool",
+        "fan": "auto"
+      },
+      "tv": {
+        "on": false,
+        "channel": 5,
+        "volume": 30
+      },
+      "fan": {
+        "on": true,
+        "speed": 2
+      }
+    },
+    "Bedroom": {
+      "light": {
+        "on": false,
+        "brightness": 40,
+        "color": "#4FC3F7"
+      },
+      "ac": {
+        "on": true,
+        "temp": 22,
+        "mode": "cool",
+        "fan": "low"
+      },
+      "fan": {
+        "on": true,
+        "speed": 1
+      },
+      "smart_lock": {
+        "locked": true,
+        "last_access": "08:32 AM"
+      }
+    },
+    "Kitchen": {
+      "light": {
+        "on": true,
+        "brightness": 100,
+        "color": "#FFFFFF"
+      },
+      "exhaust": {
+        "on": false,
+        "speed": 1
+      },
+      "fridge": {
+        "on": true,
+        "temp": 4,
+        "door": "closed"
+      },
+      "microwave": {
+        "on": false,
+        "timer": 0
+      }
+    },
+    "Bathroom": {
+      "light": {
+        "on": false,
+        "brightness": 60,
+        "color": "#FFFFFF"
+      },
+      "exhaust": {
+        "on": false,
+        "speed": 1
+      },
+      "geyser": {
+        "on": false,
+        "temp": 45
+      }
+    },
+    "Garage": {
+      "light": {
+        "on": false,
+        "brightness": 100,
+        "color": "#FFFFFF"
+      },
+      "gate": {
+        "open": false,
+        "auto_close": true
+      },
+      "security_cam": {
+        "on": true,
+        "recording": true,
+        "motion": false
+      }
+    }
+  },
+  "sensors": {
+    "Living Room": {
+      "temperature": 28.3,
+      "humidity": 61.1,
+      "motion": false,
+      "light_level": 700,
+      "air_quality": 83
+    },
+    "Bedroom": {
+      "temperature": 27.1,
+      "humidity": 65.7,
+      "motion": false,
+      "light_level": 172,
+      "air_quality": 208
+    },
+    "Kitchen": {
+      "temperature": 26.1,
+      "humidity": 67.0,
+      "motion": false,
+      "light_level": 160,
+      "air_quality": 81
+    },
+    "Bathroom": {
+      "temperature": 26.6,
+      "humidity": 54.6,
+      "motion": true,
+      "light_level": 691,
+      "air_quality": 126
+    },
+    "Garage": {
+      "temperature": 25.9,
+      "humidity": 54.3,
+      "motion": false,
+      "light_level": 79,
+      "air_quality": 195
+    }
+  },
+  "energy": {
+    "total_kwh_today": 11.9061,
+    "current_watts": 1184,
+    "monthly_kwh": 146.3,
+    "solar_generated": 1.78,
+    "cost_today_inr": 101.2,
+    "peak_hour": "18:00 - 19:00"
+  },
+  "rules": [
+    {
+      "name": "Night Mode",
+      "trigger": "time == 22:00",
+      "action": "Turn off all lights except bedroom night lamp",
+      "enabled": true,
+      "last_triggered": "Yesterday 22:00"
+    },
+    {
+      "name": "Motion Security",
+      "trigger": "motion detected + time > 23:00",
+      "action": "Turn on security cam + send alert",
+      "enabled": true,
+      "last_triggered": "2 hours ago"
+    },
+    {
+      "name": "AC Auto-Off",
+      "trigger": "no motion for 30 min",
+      "action": "Turn off AC in that room",
+      "enabled": true,
+      "last_triggered": "10:45 AM"
+    },
+    {
+      "name": "Morning Routine",
+      "trigger": "time == 07:00",
+      "action": "Open blinds, set AC to 25\u00b0C, turn on kitchen light",
+      "enabled": true,
+      "last_triggered": "Today 07:00"
+    },
+    {
+      "name": "Rain Mode",
+      "trigger": "humidity > 80%",
+      "action": "Close windows alert, turn on exhaust fans",
+      "enabled": false,
+      "last_triggered": "3 days ago"
+    }
+  ],
+  "alerts": [
+    {
+      "type": "warning",
+      "room": "Bedroom",
+      "msg": "Poor air quality AQI 208",
+      "time": "15:32:30"
+    },
+    {
+      "type": "warning",
+      "room": "Garage",
+      "msg": "Poor air quality AQI 195",
+      "time": "15:32:30"
+    }
+  ]
+}
