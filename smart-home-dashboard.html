@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Home Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ── Design Tokens ── */
+:root,[data-theme="light"]{
+  --color-bg:#f7f6f2;--color-surface:#f9f8f5;--color-surface-2:#fbfbf9;
+  --color-surface-offset:#f3f0ec;--color-surface-dynamic:#e6e4df;
+  --color-divider:#dcd9d5;--color-border:#d4d1ca;
+  --color-text:#28251d;--color-text-muted:#7a7974;--color-text-faint:#bab9b4;
+  --color-text-inverse:#f9f8f4;
+  --color-primary:#01696f;--color-primary-hover:#0c4e54;
+  --color-primary-highlight:#cedcd8;
+  --color-success:#437a22;--color-success-hover:#2e5c10;
+  --color-success-highlight:#d4dfcc;
+  --color-warning:#964219;--color-warning-highlight:#ddcfc6;
+  --color-error:#a12c7b;--color-error-highlight:#e0ced7;
+  --color-orange:#da7101;--color-blue:#006494;
+  --shadow-sm:0 1px 2px oklch(0.2 0.01 80/0.06);
+  --shadow-md:0 4px 12px oklch(0.2 0.01 80/0.08);
+  --shadow-lg:0 12px 32px oklch(0.2 0.01 80/0.12);
+  --radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--radius-full:9999px;
+  --transition:180ms cubic-bezier(0.16,1,0.3,1);
+  --font-body:'Inter','Helvetica Neue',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --text-xs:clamp(0.75rem,0.7rem + 0.25vw,0.875rem);
+  --text-sm:clamp(0.875rem,0.8rem + 0.35vw,1rem);
+  --text-base:clamp(1rem,0.95rem + 0.25vw,1.125rem);
+  --text-lg:clamp(1.125rem,1rem + 0.75vw,1.5rem);
+  --text-xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);
+  --space-1:0.25rem;--space-2:0.5rem;--space-3:0.75rem;--space-4:1rem;
+  --space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;
+  --space-12:3rem;--space-16:4rem;
+}
+[data-theme="dark"]{
+  --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;
+  --color-surface-offset:#1d1c1a;--color-surface-dynamic:#2d2c2a;
+  --color-divider:#262523;--color-border:#393836;
+  --color-text:#cdccca;--color-text-muted:#797876;--color-text-faint:#5a5957;
+  --color-text-inverse:#2b2a28;
+  --color-primary:#4f98a3;--color-primary-hover:#227f8b;
+  --color-primary-highlight:#313b3b;
+  --color-success:#6daa45;--color-success-hover:#4d8f25;
+  --color-success-highlight:#3a4435;
+  --color-warning:#bb653b;--color-warning-highlight:#564942;
+  --color-error:#d163a7;--color-error-highlight:#4c3d46;
+  --color-orange:#fdab43;--color-blue:#5591c7;
+  --shadow-sm:0 1px 2px oklch(0 0 0/0.2);
+  --shadow-md:0 4px 12px oklch(0 0 0/0.3);
+  --shadow-lg:0 12px 32px oklch(0 0 0/0.4);
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme]){
+  --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;
+  --color-surface-offset:#1d1c1a;--color-surface-dynamic:#2d2c2a;
+  --color-divider:#262523;--color-border:#393836;
+  --color-text:#cdccca;--color-text-muted:#797876;--color-text-faint:#5a5957;
+  --color-primary:#4f98a3;--color-success:#6daa45;
+  --color-warning:#bb653b;--color-error:#d163a7;--color-orange:#fdab43;--color-blue:#5591c7;
+  --shadow-sm:0 1px 2px oklch(0 0 0/0.2);
+  --shadow-md:0 4px 12px oklch(0 0 0/0.3);
+  --shadow-lg:0 12px 32px oklch(0 0 0/0.4);
+}}
+
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;scroll-behavior:smooth}
+body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-sm);color:var(--color-text);background:var(--color-bg);transition:background var(--transition),color var(--transition)}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+a,button,[role="button"]{transition:color var(--transition),background var(--transition),border-color var(--transition),box-shadow var(--transition),opacity var(--transition)}
+:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px;border-radius:var(--radius-sm)}
+::selection{background:oklch(from var(--color-primary) l c h/0.2);color:var(--color-text)}
+
+/* ── Layout ── */
+.app{display:grid;grid-template-rows:auto 1fr;min-height:100dvh}
+header{position:sticky;top:0;z-index:100;background:var(--color-surface);border-bottom:1px solid var(--color-border);padding:var(--space-3) var(--space-6);display:flex;align-items:center;justify-content:space-between;gap:var(--space-4)}
+.logo{display:flex;align-items:center;gap:var(--space-3)}
+.logo-icon{width:32px;height:32px;flex-shrink:0}
+.logo-text{font-size:var(--text-base);font-weight:600;letter-spacing:-0.02em}
+.logo-sub{font-size:var(--text-xs);color:var(--color-text-muted)}
+.header-right{display:flex;align-items:center;gap:var(--space-3)}
+.status-badge{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs);color:var(--color-text-muted);background:var(--color-surface-offset);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);border:1px solid var(--color-border)}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--color-success);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.15)}}
+.theme-btn{width:36px;height:36px;border-radius:var(--radius-md);background:var(--color-surface-offset);border:1px solid var(--color-border);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted)}
+.theme-btn:hover{background:var(--color-surface-dynamic);color:var(--color-text)}
+.sim-btn{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-4);border-radius:var(--radius-md);background:var(--color-primary);color:var(--color-text-inverse);font-size:var(--text-xs);font-weight:600;border:none;cursor:pointer}
+.sim-btn:hover{background:var(--color-primary-hover)}
+
+main{padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-6);max-width:1400px;margin-inline:auto;width:100%}
+
+/* ── KPI Row ── */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(200px,100%),1fr));gap:var(--space-4)}
+.kpi-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:var(--space-2)}
+.kpi-label{font-size:var(--text-xs);color:var(--color-text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.06em}
+.kpi-value{font-size:var(--text-xl);font-weight:700;font-family:var(--font-mono);letter-spacing:-0.02em;line-height:1}
+.kpi-sub{font-size:var(--text-xs);color:var(--color-text-muted)}
+.kpi-icon{font-size:1.4rem;margin-bottom:var(--space-1)}
+
+/* ── Grid ── */
+.grid-2{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(420px,100%),1fr));gap:var(--space-5)}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:var(--space-4)}
+.section-title{font-size:var(--text-base);font-weight:600;color:var(--color-text);margin-bottom:var(--space-4);display:flex;align-items:center;gap:var(--space-2)}
+
+/* ── Room Card ── */
+.room-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);box-shadow:var(--shadow-sm)}
+.room-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4)}
+.room-name{font-weight:600;font-size:var(--text-base)}
+.room-sensors{display:flex;gap:var(--space-3);flex-wrap:wrap;margin-bottom:var(--space-4)}
+.sensor-chip{display:flex;align-items:center;gap:var(--space-1);font-size:var(--text-xs);color:var(--color-text-muted);background:var(--color-surface-offset);padding:var(--space-1) var(--space-2);border-radius:var(--radius-full)}
+.devices-list{display:flex;flex-direction:column;gap:var(--space-2)}
+.device-row{display:flex;align-items:center;justify-content:space-between;padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);background:var(--color-surface-offset);border:1px solid oklch(from var(--color-text) l c h/0.06)}
+.device-name{font-size:var(--text-xs);font-weight:500;text-transform:capitalize}
+.device-meta{font-size:var(--text-xs);color:var(--color-text-muted);font-family:var(--font-mono)}
+
+/* ── Toggle ── */
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{position:absolute;inset:0;border-radius:var(--radius-full);background:var(--color-surface-dynamic);cursor:pointer;transition:background var(--transition)}
+.toggle input:checked + .toggle-track{background:var(--color-primary)}
+.toggle-track::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform var(--transition);box-shadow:0 1px 3px oklch(0 0 0/0.2)}
+.toggle input:checked + .toggle-track::after{transform:translateX(18px)}
+
+/* ── Alert Panel ── */
+.alerts-panel{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);box-shadow:var(--shadow-sm)}
+.alert-item{display:flex;align-items:flex-start;gap:var(--space-3);padding:var(--space-3);border-radius:var(--radius-md);margin-bottom:var(--space-2);border:1px solid transparent}
+.alert-item.warning{background:color-mix(in oklch,var(--color-warning) 8%,transparent);border-color:color-mix(in oklch,var(--color-warning) 25%,transparent)}
+.alert-item.security{background:color-mix(in oklch,var(--color-error) 8%,transparent);border-color:color-mix(in oklch,var(--color-error) 25%,transparent)}
+.alert-item.info{background:color-mix(in oklch,var(--color-primary) 8%,transparent);border-color:color-mix(in oklch,var(--color-primary) 25%,transparent)}
+.alert-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.alert-text{font-size:var(--text-xs);color:var(--color-text)}
+.alert-time{font-size:var(--text-xs);color:var(--color-text-faint);font-family:var(--font-mono)}
+.no-alerts{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--color-text-muted);padding:var(--space-4)}
+
+/* ── Energy Bar ── */
+.energy-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);box-shadow:var(--shadow-sm)}
+.energy-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3);font-size:var(--text-sm)}
+.bar-wrap{height:8px;background:var(--color-surface-dynamic);border-radius:var(--radius-full);overflow:hidden;margin-top:var(--space-1)}
+.bar-fill{height:100%;border-radius:var(--radius-full);transition:width 0.6s ease;background:var(--color-primary)}
+
+/* ── Automation Rules ── */
+.rules-panel{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);box-shadow:var(--shadow-sm)}
+.rule-row{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3) 0;border-bottom:1px solid var(--color-divider)}
+.rule-row:last-child{border-bottom:none}
+.rule-info{flex:1;min-width:0}
+.rule-name{font-size:var(--text-sm);font-weight:600}
+.rule-trigger{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rule-last{font-size:var(--text-xs);color:var(--color-text-faint);font-family:var(--font-mono);flex-shrink:0}
+
+/* ── Temp gauge ── */
+.temp-arc{display:flex;flex-direction:column;align-items:center;gap:var(--space-1)}
+.temp-svg{width:60px;height:36px}
+
+/* ── Log ── */
+.log-panel{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);box-shadow:var(--shadow-sm)}
+.log-scroll{max-height:180px;overflow-y:auto;font-family:var(--font-mono);font-size:var(--text-xs);color:var(--color-text-muted);display:flex;flex-direction:column;gap:var(--space-1)}
+.log-line{padding:var(--space-1) var(--space-2);border-radius:var(--radius-sm);background:var(--color-surface-offset)}
+.log-line.on{color:var(--color-success)}
+.log-line.off{color:var(--color-warning)}
+
+/* ── Responsive ── */
+@media(max-width:600px){
+  header{padding:var(--space-3) var(--space-4)}
+  main{padding:var(--space-4) var(--space-3)}
+  .logo-sub{display:none}
+  .header-right .status-badge{display:none}
+}
+</style>
+</head>
+<body>
+<a href="#main" class="sr-only">Skip to content</a>
+<div class="app">
+
+<!-- ── Header ── -->
+<header>
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 32 32" fill="none" aria-label="Smart Home Logo">
+      <path d="M16 3L3 14h3v14h7v-8h6v8h7V14h3L16 3z" fill="var(--color-primary)" opacity="0.15"/>
+      <path d="M16 3L3 14h3v14h7v-8h6v8h7V14h3L16 3z" stroke="var(--color-primary)" stroke-width="1.5" stroke-linejoin="round"/>
+      <circle cx="16" cy="16" r="2.5" fill="var(--color-primary)"/>
+    </svg>
+    <div>
+      <div class="logo-text">Smart Home</div>
+      <div class="logo-sub">Sameer Bansal · SRMIST IoT</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="status-badge">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="last-update">Initializing…</span>
+    </div>
+    <button class="sim-btn" onclick="simulateCycle()" aria-label="Refresh simulation">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Refresh
+    </button>
+    <button class="theme-btn" data-theme-toggle aria-label="Toggle dark mode">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ── Main ── -->
+<main id="main">
+
+  <!-- KPI Row -->
+  <div class="kpi-row" id="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-icon">⚡</div>
+      <div class="kpi-label">Current Load</div>
+      <div class="kpi-value" id="kpi-watts" style="color:var(--color-primary)">—</div>
+      <div class="kpi-sub">Watts right now</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">📊</div>
+      <div class="kpi-label">Today's Usage</div>
+      <div class="kpi-value" id="kpi-kwh" style="color:var(--color-orange)">—</div>
+      <div class="kpi-sub">kWh consumed</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-label">Cost Today</div>
+      <div class="kpi-value" id="kpi-cost" style="color:var(--color-success)">—</div>
+      <div class="kpi-sub">At ₹8.5 / kWh</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">☀️</div>
+      <div class="kpi-label">Solar Generated</div>
+      <div class="kpi-value" id="kpi-solar" style="color:var(--color-warning)">—</div>
+      <div class="kpi-sub">kWh from solar</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🔔</div>
+      <div class="kpi-label">Active Alerts</div>
+      <div class="kpi-value" id="kpi-alerts" style="color:var(--color-error)">—</div>
+      <div class="kpi-sub">Needs attention</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">📱</div>
+      <div class="kpi-label">Devices On</div>
+      <div class="kpi-value" id="kpi-devices" style="color:var(--color-blue)">—</div>
+      <div class="kpi-sub">Across all rooms</div>
+    </div>
+  </div>
+
+  <!-- Rooms + Alerts -->
+  <div class="grid-2">
+    <!-- Rooms -->
+    <div>
+      <div class="section-title">🏠 Rooms & Devices</div>
+      <div id="rooms-container" style="display:flex;flex-direction:column;gap:var(--space-4)"></div>
+    </div>
+
+    <!-- Right column -->
+    <div style="display:flex;flex-direction:column;gap:var(--space-5)">
+
+      <!-- Alerts -->
+      <div class="alerts-panel">
+        <div class="section-title">🔔 Alerts</div>
+        <div id="alerts-container"></div>
+      </div>
+
+      <!-- Energy breakdown -->
+      <div class="energy-card">
+        <div class="section-title">⚡ Energy Breakdown</div>
+        <div id="energy-bars"></div>
+      </div>
+
+      <!-- Automation Rules -->
+      <div class="rules-panel">
+        <div class="section-title">⚙️ Automation Rules</div>
+        <div id="rules-container"></div>
+      </div>
+
+      <!-- Event Log -->
+      <div class="log-panel">
+        <div class="section-title">📋 Event Log</div>
+        <div class="log-scroll" id="log-container"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+/* ── Theme Toggle ── */
+(function(){
+  const t=document.querySelector('[data-theme-toggle]'),r=document.documentElement;
+  let d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  r.setAttribute('data-theme',d);
+  t&&t.addEventListener('click',()=>{
+    d=d==='dark'?'light':'dark';
+    r.setAttribute('data-theme',d);
+    t.innerHTML=d==='dark'
+      ?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      :'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  });
+})();
+
+/* ── Simulation Data ── */
+const ROOMS = ['Living Room','Bedroom','Kitchen','Bathroom','Garage'];
+
+const ROOM_DEVICES = {
+  'Living Room':  {light:{on:true,brightness:80},ac:{on:true,temp:24,mode:'cool'},tv:{on:false,channel:5},fan:{on:true,speed:2}},
+  'Bedroom':      {light:{on:false,brightness:40},ac:{on:true,temp:22},fan:{on:true,speed:1},smart_lock:{locked:true}},
+  'Kitchen':      {light:{on:true,brightness:100},exhaust:{on:false},fridge:{on:true,temp:4},microwave:{on:false}},
+  'Bathroom':     {light:{on:false,brightness:60},exhaust:{on:false},geyser:{on:false,temp:45}},
+  'Garage':       {light:{on:false},gate:{open:false},security_cam:{on:true,recording:true}},
+};
+
+const ROOM_ICONS = {
+  'Living Room':'🛋️','Bedroom':'🛏️','Kitchen':'🍳','Bathroom':'🚿','Garage':'🚗'
+};
+
+let state = {
+  devices: JSON.parse(JSON.stringify(ROOM_DEVICES)),
+  sensors: {},
+  energy:  {},
+  alerts:  [],
+  rules:   [],
+  log:     [],
+};
+
+const RULES = [
+  {name:'Night Mode',     trigger:'time == 22:00', action:'Turn off all lights', enabled:true,  last:'Yesterday 22:00'},
+  {name:'Motion Security',trigger:'motion + night', action:'Activate cameras + alert', enabled:true, last:'2 hours ago'},
+  {name:'AC Auto-Off',    trigger:'no motion 30min',action:'Turn off AC in room', enabled:true, last:'10:45 AM'},
+  {name:'Morning Routine',trigger:'time == 07:00',  action:'Lights + AC to 25°C', enabled:true, last:'Today 07:00'},
+  {name:'Rain Mode',      trigger:'humidity > 80%', action:'Close alerts, fans on', enabled:false,last:'3 days ago'},
+];
+
+function rand(min,max){return Math.random()*(max-min)+min;}
+function randInt(min,max){return Math.floor(rand(min,max+1));}
+function round1(n){return Math.round(n*10)/10;}
+
+function generateSensors(){
+  const h = new Date().getHours();
+  const sensors = {};
+  ROOMS.forEach(room=>{
+    const base = 26 + 4*Math.sin((h-14)*Math.PI/12);
+    sensors[room]={
+      temperature: round1(base + rand(-1.5,1.5)),
+      humidity:    round1(rand(40,75)),
+      motion:      Math.random()<0.2,
+      air_quality: randInt(50,200),
+      light_level: randInt(0,1000),
+    };
+  });
+  return sensors;
+}
+
+function generateEnergy(){
+  let active=0;
+  ROOMS.forEach(room=>{
+    Object.values(state.devices[room]).forEach(dev=>{
+      if(dev.on===true||dev.recording===true)active++;
+    });
+  });
+  const watts = active * randInt(80,180);
+  const kwh   = round1(rand(4,12));
+  return {
+    current_watts: watts,
+    total_kwh_today: kwh,
+    monthly_kwh: round1(rand(120,280)),
+    solar_generated: round1(rand(1,5)),
+    cost_today_inr: round1(kwh*8.5),
+    peak_hour: '18:00 – 19:00',
+  };
+}
+
+function generateAlerts(sensors){
+  const alerts=[];
+  const h=new Date().getHours();
+  ROOMS.forEach(room=>{
+    const s=sensors[room];
+    if(s.temperature>33) alerts.push({type:'warning',room,msg:`High temp: ${s.temperature}°C`,time:timestamp()});
+    if(s.air_quality>160) alerts.push({type:'warning',room,msg:`Poor air quality: AQI ${s.air_quality}`,time:timestamp()});
+    if(s.motion&&h>=23) alerts.push({type:'security',room,msg:`Motion at night in ${room}`,time:timestamp()});
+    if(s.humidity>70) alerts.push({type:'info',room,msg:`High humidity: ${s.humidity}%`,time:timestamp()});
+  });
+  return alerts.slice(0,6);
+}
+
+const logLines=[];
+function addLog(msg,type=''){
+  logLines.unshift({msg,type,time:timestamp()});
+  if(logLines.length>20)logLines.pop();
+}
+
+function timestamp(){return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+
+function simulateCycle(){
+  state.sensors = generateSensors();
+  state.energy  = generateEnergy();
+  state.alerts  = generateAlerts(state.sensors);
+  state.rules   = RULES;
+  addLog('Sensor data refreshed','info');
+  renderAll();
+  document.getElementById('last-update').textContent = 'Updated '+timestamp();
+}
+
+/* ── Render ── */
+function renderKPIs(){
+  const e=state.energy;
+  setText('kpi-watts', e.current_watts+'W');
+  setText('kpi-kwh',   e.total_kwh_today+' kWh');
+  setText('kpi-cost',  '₹'+e.cost_today_inr);
+  setText('kpi-solar', e.solar_generated+' kWh');
+  setText('kpi-alerts',state.alerts.length.toString());
+  let on=0;
+  ROOMS.forEach(r=>Object.values(state.devices[r]).forEach(d=>{if(d.on===true||d.recording===true)on++;}));
+  setText('kpi-devices',on.toString());
+}
+
+function setText(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
+
+function tempColor(t){return t<=26?'var(--color-primary)':t<=32?'var(--color-orange)':'var(--color-error)';}
+
+function renderRooms(){
+  const c=document.getElementById('rooms-container');
+  c.innerHTML='';
+  ROOMS.forEach(room=>{
+    const s=state.sensors[room]||{};
+    const devs=state.devices[room];
+    const card=document.createElement('div');
+    card.className='room-card';
+
+    const motionBadge=s.motion
+      ?`<span style="font-size:var(--text-xs);background:color-mix(in oklch,var(--color-warning) 15%,transparent);color:var(--color-warning);padding:2px 8px;border-radius:var(--radius-full)">Motion</span>`
+      :'';
+
+    card.innerHTML=`
+      <div class="room-header">
+        <div class="room-name">${ROOM_ICONS[room]||'🏠'} ${room}</div>
+        ${motionBadge}
+      </div>
+      <div class="room-sensors">
+        <span class="sensor-chip">🌡️ <span style="color:${tempColor(s.temperature)}">${s.temperature}°C</span></span>
+        <span class="sensor-chip">💧 ${s.humidity}%</span>
+        <span class="sensor-chip">🌬️ AQI ${s.air_quality}</span>
+      </div>
+      <div class="devices-list" id="devlist-${room.replace(/ /g,'_')}"></div>
+    `;
+    c.appendChild(card);
+
+    const devList=card.querySelector(`#devlist-${room.replace(/ /g,'_')}`);
+    Object.entries(devs).forEach(([name,dev])=>{
+      const row=document.createElement('div');
+      row.className='device-row';
+      const isOn=dev.on===true||dev.recording===true||dev.locked===true||dev.open===true;
+      let meta='';
+      if(dev.temp!==undefined&&dev.mode) meta=`${dev.temp}°C · ${dev.mode}`;
+      else if(dev.brightness!==undefined) meta=`${dev.brightness}% brightness`;
+      else if(dev.speed!==undefined) meta=`Speed ${dev.speed}`;
+      else if(dev.channel!==undefined) meta=`Ch ${dev.channel} · Vol ${dev.volume}`;
+      else if(dev.locked!==undefined) meta=dev.locked?'Locked':'Unlocked';
+      else if(dev.temp!==undefined) meta=`${dev.temp}°C`;
+
+      const toggleKey = dev.on!==undefined?'on':dev.locked!==undefined?'locked':dev.open!==undefined?'open':null;
+
+      row.innerHTML=`
+        <span class="device-name">${name.replace(/_/g,' ')}</span>
+        <span class="device-meta">${meta}</span>
+        ${toggleKey?`<label class="toggle" aria-label="Toggle ${name}">
+          <input type="checkbox" ${isOn?'checked':''} onchange="toggleDevice('${room}','${name}','${toggleKey}',this.checked)">
+          <span class="toggle-track"></span>
+        </label>`:`<span style="font-size:var(--text-xs);color:${isOn?'var(--color-success)':'var(--color-text-faint)'};">${isOn?'●':'○'}</span>`}
+      `;
+      devList.appendChild(row);
+    });
+  });
+}
+
+function toggleDevice(room,device,key,val){
+  state.devices[room][device][key]=val;
+  const status=val?'ON':'OFF';
+  addLog(`${room} → ${device.replace(/_/g,' ')} ${status}`, val?'on':'off');
+  renderKPIs();
+  renderLog();
+}
+
+function renderAlerts(){
+  const c=document.getElementById('alerts-container');
+  c.innerHTML='';
+  if(!state.alerts.length){
+    c.innerHTML=`<div class="no-alerts">✅ No active alerts — all systems normal</div>`;
+    return;
+  }
+  state.alerts.forEach(a=>{
+    const div=document.createElement('div');
+    div.className=`alert-item ${a.type}`;
+    const icon=a.type==='security'?'🔐':a.type==='warning'?'⚠️':'ℹ️';
+    div.innerHTML=`
+      <span class="alert-icon">${icon}</span>
+      <div style="flex:1">
+        <div class="alert-text"><strong>${a.room}</strong> — ${a.msg}</div>
+        <div class="alert-time">${a.time}</div>
+      </div>
+      <button onclick="this.parentElement.remove()" style="color:var(--color-text-faint);padding:var(--space-1)" aria-label="Dismiss alert">✕</button>
+    `;
+    c.appendChild(div);
+  });
+}
+
+function renderEnergy(){
+  const c=document.getElementById('energy-bars');
+  const e=state.energy;
+  const items=[
+    {label:'Current Load',    val:e.current_watts,  max:3000, unit:'W',   color:'var(--color-primary)'},
+    {label:'Daily Usage',     val:e.total_kwh_today,max:20,   unit:' kWh',color:'var(--color-orange)'},
+    {label:'Solar Generation',val:e.solar_generated,max:10,   unit:' kWh',color:'var(--color-success)'},
+    {label:'Monthly Usage',   val:e.monthly_kwh,    max:400,  unit:' kWh',color:'var(--color-blue)'},
+  ];
+  c.innerHTML=items.map(i=>`
+    <div class="energy-row">
+      <span style="font-size:var(--text-xs);color:var(--color-text-muted)">${i.label}</span>
+      <span style="font-family:var(--font-mono);font-size:var(--text-xs);font-weight:600">${i.val}${i.unit}</span>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-fill" style="width:${Math.min(100,(i.val/i.max)*100).toFixed(1)}%;background:${i.color}"></div>
+    </div>
+    <div style="margin-bottom:var(--space-3)"></div>
+  `).join('');
+}
+
+function renderRules(){
+  const c=document.getElementById('rules-container');
+  c.innerHTML=state.rules.map(r=>`
+    <div class="rule-row">
+      <div class="rule-info">
+        <div class="rule-name">${r.name}</div>
+        <div class="rule-trigger">${r.trigger} → ${r.action}</div>
+      </div>
+      <span class="rule-last">${r.last}</span>
+      <label class="toggle" aria-label="Toggle rule ${r.name}" style="margin-left:var(--space-3)">
+        <input type="checkbox" ${r.enabled?'checked':''} onchange="toggleRule('${r.name}',this.checked)">
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+  `).join('');
+}
+
+function toggleRule(name,val){
+  const rule=state.rules.find(r=>r.name===name);
+  if(rule){
+    rule.enabled=val;
+    addLog(`Rule "${name}" ${val?'enabled':'disabled'}`,val?'on':'off');
+    renderLog();
+  }
+}
+
+function renderLog(){
+  const c=document.getElementById('log-container');
+  c.innerHTML=logLines.map(l=>`
+    <div class="log-line ${l.type}">
+      <span style="color:var(--color-text-faint)">${l.time}</span>  ${l.msg}
+    </div>
+  `).join('') || '<div class="log-line">No events yet.</div>';
+}
+
+function renderAll(){
+  renderKPIs();
+  renderRooms();
+  renderAlerts();
+  renderEnergy();
+  renderRules();
+  renderLog();
+}
+
+/* ── Init ── */
+simulateCycle();
+setInterval(simulateCycle, 8000);
+</script>
+</body>
+</html>
